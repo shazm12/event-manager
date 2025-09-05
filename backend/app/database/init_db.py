@@ -1,5 +1,5 @@
 from .database import engine, Base
-from ..models import user, event
+from ..models import event, attendees
 
 def create_tables():
     """Create all database tables"""

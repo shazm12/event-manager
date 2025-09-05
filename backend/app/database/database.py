@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database URL - using SQLite for simplicity, can be changed to PostgreSQL
+# Database URL - using SQLite for now
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./event_management.db")
 
 engine = create_engine(
@@ -19,7 +19,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
-    """Dependency to get database session"""
     db = SessionLocal()
     try:
         yield db
