@@ -1,34 +1,51 @@
-from pydantic import BaseModel
+from app.schemas.attendee import AttendeeResponse
+from pydantic import BaseModel, field_validator, model_validator
 from datetime import datetime
 from typing import Optional
 
 class EventBase(BaseModel):
-    title: str
-    description: Optional[str] = None
+    name: str
     location: str
-    start_date: datetime
-    end_date: datetime
-    max_attendees: Optional[int] = None
+    start_time: datetime
+    end_time: datetime
+    max_capacity: int
 
 class EventCreate(EventBase):
-    pass
+    @field_validator('max_capacity')
+    @classmethod
+    def validate_capacity(cls, v):
+        if v <= 0:
+            raise ValueError('Max capacity must be greater than 0')
+        return v
+    
+    @field_validator('name', 'location')
+    @classmethod
+    def validate_strings(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Name and location cannot be empty')
+        return v.strip()
+    
+    @model_validator(mode='after')
+    def validate_times(self):
+        if self.start_time >= self.end_time:
+            raise ValueError('End time must be after start time')
+        return self
 
 class EventUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = None
     location: Optional[str] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    max_attendees: Optional[int] = None
-    is_active: Optional[bool] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    max_capacity: Optional[int] = None
 
 class EventResponse(EventBase):
     id: int
-    current_attendees: int
-    is_active: bool
+    location: str
+    start_time: datetime
+    end_time: datetime
+    attendees: list[AttendeeResponse]
     created_at: datetime
     updated_at: datetime
-    organizer_id: int
 
     class Config:
         from_attributes = True
