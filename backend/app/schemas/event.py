@@ -38,14 +38,30 @@ class EventUpdate(BaseModel):
     end_time: Optional[datetime] = None
     max_capacity: Optional[int] = None
 
+class PaginationResponse(BaseModel):
+    total: int
+    skip: int
+    limit: int
+    has_next: bool
+    has_prev: bool
+
 class EventResponse(EventBase):
     id: int
     location: str
     start_time: datetime
     end_time: datetime
     attendees: list[AttendeeResponse]
+    max_capacity: int
     created_at: datetime
     updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class EventsResponse(BaseModel):
+    events: list[EventResponse]
+    pagination: PaginationResponse  
+    
 
     class Config:
         from_attributes = True
