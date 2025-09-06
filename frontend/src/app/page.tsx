@@ -10,9 +10,10 @@ import { DateTimeInput } from "@/components/ui/datetime-input"
 import { EventFormData } from "./types";
 import { toast } from "sonner";
 import { createEvent } from "./actions/create-event"
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  
+
   // Helper function to get current datetime in the correct format
   const getCurrentDateTime = () => {
     const now = new Date()
@@ -29,7 +30,8 @@ export default function Home() {
     description: ""
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (field: keyof EventFormData, value: string) => {
     setFormData(prev => {
@@ -37,21 +39,21 @@ export default function Home() {
         ...prev,
         [field]: value
       }
-      
+
       // Auto-set end time to 2 hours after start time when start time changes
       if (field === 'startTime' && value && !prev.endTime) {
         const startDate = new Date(value)
         startDate.setHours(startDate.getHours() + 2)
         newData.endTime = startDate.toISOString().slice(0, 16)
       }
-      
-      return newData
+
+      return newData;
     })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Basic form validation
     if (!formData.name.trim()) {
       toast.error('Event name is required', {
@@ -59,39 +61,39 @@ export default function Home() {
       })
       return
     }
-    
+
     if (!formData.location.trim()) {
       toast.error('Location is required', {
         description: 'Please enter a location for your event.',
       })
       return
     }
-    
+
     if (!formData.startTime || !formData.endTime) {
       toast.error('Date and time are required', {
         description: 'Please select both start and end times for your event.',
       })
-      return
+      return;
     }
-    
+
     if (new Date(formData.startTime) >= new Date(formData.endTime)) {
       toast.error('Invalid time range', {
         description: 'End time must be after start time.',
       })
       return;
     }
-    
+
     if (!formData.maxCapacity || parseInt(formData.maxCapacity) <= 0) {
       toast.error('Invalid capacity', {
         description: 'Please enter a valid maximum capacity (greater than 0).',
       })
       return
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      
+
       const response = await createEvent(formData);
 
       if (response.ok) {
@@ -105,11 +107,16 @@ export default function Home() {
           maxCapacity: "",
           description: ""
         })
-        
+
         toast.success('Event created successfully!', {
           description: `"${event.name}" has been created and is ready for attendees.`,
           duration: 4000,
-        })
+        });
+        // Redirect to event details page after a short delay
+        setTimeout(() => {
+          router.push(`/events`);
+        }, 2000);
+
       } else {
         const error = await response.json()
         console.error('Error creating event:', error);
@@ -137,7 +144,7 @@ export default function Home() {
           Welcome to EventManager
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Create, manage, and track your events with ease. From small meetups to large conferences, 
+          Create, manage, and track your events with ease. From small meetups to large conferences,
           we've got you covered.
         </p>
       </div>
@@ -231,9 +238,9 @@ export default function Home() {
                 />
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full mt-4" 
+              <Button
+                type="submit"
+                className="w-full mt-4"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Creating Event..." : "Create Event"}
