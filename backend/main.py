@@ -5,7 +5,7 @@ import uvicorn
 
 app = FastAPI(
     title="Event Management API",
-    description="A simple FastAPI server following MVC architecture",
+    description="A simple FastAPI server for Event Management System",
     version="1.0.0",
     redirect_slashes=False
 )
