@@ -1,6 +1,8 @@
 # Event Management API
 
-A simple FastAPI server following MVC (Model-View-Controller) architecture for event management.
+A FastAPI backend server for the Event Management application, following MVC architecture.
+
+> **Note**: For general project information and Docker setup, see the main [README.md](../README.md)
 
 ## Project Structure
 

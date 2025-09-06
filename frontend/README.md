@@ -2,6 +2,8 @@
 
 A modern event management frontend built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui.
 
+> **Note**: For general project information and Docker setup, see the main [README.md](../README.md)
+
 ## Features
 
 - 🎨 **Modern UI**: Built with shadcn/ui components and Tailwind CSS
