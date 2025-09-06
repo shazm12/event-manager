@@ -2,10 +2,10 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.attendees import Attendee
-from app.schemas.attendee import AttendeeCreate, AttendeeResponse
+from app.schemas.attendee import AttendeeCreate, AttendeeResponse, AttendeesResponse
 from app.database.database import get_db
 from app.models.event import Event
-from app.schemas.event import EventCreate, EventResponse, EventUpdate
+from app.schemas.event import EventCreate, EventResponse, EventsResponse, PaginationResponse
 
 router = APIRouter()
 
@@ -46,11 +46,34 @@ def create_event(event: EventCreate, db: Session = Depends(get_db)):
             detail=f"Error creating event: {str(e)}"
         )
 
-@router.get("/", response_model=list[EventResponse])
+@router.get("/", response_model=EventsResponse)
 def get_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get all events with pagination"""
+    total_count = db.query(Event).count()
     events = db.query(Event).offset(skip).limit(limit).all()
-    return events
+    
+    # Return paginated response
+    return {
+        "events": events,
+        "pagination": {
+            "total": total_count,
+            "skip": skip,
+            "limit": limit,
+            "has_next": skip + limit < total_count,
+            "has_prev": skip > 0
+        }
+    }
+
+@router.get("/{event_id}/", response_model=EventResponse)
+def get_event(event_id: int, db: Session = Depends(get_db)):
+    """Get a single event by ID"""
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found"
+        )
+    return event
 
 @router.post("/{event_id}/register", response_model=AttendeeResponse)
 def create_attendee(event_id: int, attendee: AttendeeCreate, db: Session = Depends(get_db)):
@@ -94,10 +117,22 @@ def create_attendee(event_id: int, attendee: AttendeeCreate, db: Session = Depen
         )
 
 
-@router.get("/{event_id}/attendees", response_model=list[AttendeeResponse])
-def get_event_attendees(event_id: int, db: Session = Depends(get_db)):
+@router.get("/{event_id}/attendees", response_model=AttendeesResponse)
+def get_event_attendees(event_id: int, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     """Get all attendees for an event"""
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    return event.attendees
+    total_count = len(event.attendees)
+    attendees = event.attendees[skip:skip+limit]
+    
+    return {
+        "attendees": attendees,
+        "pagination": {
+            "total": total_count,
+            "skip": skip,
+            "limit": limit,
+            "has_next": skip + limit < total_count,
+            "has_prev": skip > 0
+        }
+    }    
