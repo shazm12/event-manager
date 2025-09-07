@@ -93,38 +93,27 @@ export default function Home() {
     setIsSubmitting(true);
 
     try {
+      const event = await createEvent(formData);
+      
+      // Reset form
+      setFormData({
+        name: "",
+        location: "",
+        startTime: getCurrentDateTime(),
+        endTime: "",
+        maxCapacity: "",
+        description: ""
+      })
 
-      const response = await createEvent(formData);
-
-      if (response.ok) {
-        const event = await response.json();
-        // Reset form
-        setFormData({
-          name: "",
-          location: "",
-          startTime: getCurrentDateTime(),
-          endTime: "",
-          maxCapacity: "",
-          description: ""
-        })
-
-        toast.success('Event created successfully!', {
-          description: `"${event.name}" has been created and is ready for attendees.`,
-          duration: 4000,
-        });
-        // Redirect to event details page after a short delay
-        setTimeout(() => {
-          router.push(`/events`);
-        }, 2000);
-
-      } else {
-        const error = await response.json()
-        console.error('Error creating event:', error);
-        toast.error('Failed to create event', {
-          description: error.detail || 'Unknown error occurred. Please try again.',
-          duration: 5000,
-        })
-      }
+      toast.success('Event created successfully!', {
+        description: `"${event.name}" has been created and is ready for attendees.`,
+        duration: 4000,
+      });
+      
+      // Redirect to event details page after a short delay
+      setTimeout(() => {
+        router.push(`/events`);
+      }, 2000);
     } catch (error) {
       console.error('Error creating event:', error)
       toast.error('Network error', {
