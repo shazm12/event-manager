@@ -123,8 +123,15 @@ def get_event_attendees(event_id: int, skip: int = 0, limit: int = 10, db: Sessi
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-    total_count = len(event.attendees)
-    attendees = event.attendees[skip:skip+limit]
+    
+    total_count = db.query(Attendee).filter(Attendee.event_id == event_id).count()
+    attendees = (
+        db.query(Attendee)
+        .filter(Attendee.event_id == event_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     
     return {
         "attendees": attendees,
@@ -135,4 +142,4 @@ def get_event_attendees(event_id: int, skip: int = 0, limit: int = 10, db: Sessi
             "has_next": skip + limit < total_count,
             "has_prev": skip > 0
         }
-    }    
+    }
