@@ -12,6 +12,8 @@ import { toast } from "sonner"
 import { Event, EventRegistrationFormData } from "@/app/types"
 import { registerAttendee } from "@/app/actions/register-attendee"
 import { getEvent } from "@/app/actions/get-event"
+import { formatDate, formatTime } from "@/lib/timezone"
+import { TimezoneIndicator } from "@/components/timezone-indicator"
 
 export default function EventRegisterPage({ params }: { params: Promise<{ event_id: string }> }) {
     const { event_id } = use(params)
@@ -100,23 +102,6 @@ export default function EventRegisterPage({ params }: { params: Promise<{ event_
         }
     }
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString)
-        return date.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        })
-    }
-
-    const formatTime = (dateString: string) => {
-        const date = new Date(dateString)
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-        })
-    }
 
     if (eventLoading) {
         return (
@@ -173,6 +158,9 @@ export default function EventRegisterPage({ params }: { params: Promise<{ event_
                             <div>
                                 <h3 className="text-lg font-semibold">{event.name}</h3>
                                 <p className="text-muted-foreground">{event.description || 'No description available'}</p>
+                                <div className="mt-2">
+                                    <TimezoneIndicator />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

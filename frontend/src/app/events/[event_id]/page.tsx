@@ -10,6 +10,8 @@ import { toast } from "sonner"
 import { Event } from "../../types";
 import { getEvent } from "../../actions/get-event";
 import { AttendeesList } from "@/components/attendees-list";
+import { formatDate, formatTime, getEventStatus } from "@/lib/timezone";
+import { TimezoneIndicator } from "@/components/timezone-indicator";
 
 export default function EventDetailsPage({ params }: { params: Promise<{ event_id: string }> }) {
   const { event_id } = use(params);
@@ -36,37 +38,6 @@ export default function EventDetailsPage({ params }: { params: Promise<{ event_i
     fetchEventDetails()
   }, [event_id])
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const getEventStatus = (startTime: string, endTime: string) => {
-    const now = new Date()
-    const start = new Date(startTime)
-    const end = new Date(endTime)
-
-    if (now < start) {
-      return { status: 'upcoming', color: 'bg-blue-100 text-blue-800' }
-    } else if (now >= start && now <= end) {
-      return { status: 'ongoing', color: 'bg-green-100 text-green-800' }
-    } else {
-      return { status: 'ended', color: 'bg-gray-100 text-gray-800' }
-    }
-  }
 
 
   if (loading) {
@@ -123,6 +94,7 @@ export default function EventDetailsPage({ params }: { params: Promise<{ event_i
                 {eventStatus.status}
               </Badge>
             </div>
+            <TimezoneIndicator />
           </div>
         </div>
       </div>

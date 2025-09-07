@@ -9,6 +9,8 @@ import Link from "next/link"
 import { toast } from "sonner";
 import { Event, PaginatedEventsResponse } from "../types";
 import { getEvents } from "../actions/get-events";
+import { formatDate, formatTime, getEventStatus } from "@/lib/timezone";
+import { TimezoneIndicator } from "@/components/timezone-indicator";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -41,37 +43,6 @@ export default function EventsPage() {
     fetchEvents();
   }, [currentPage, itemsPerPage])
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const getEventStatus = (startTime: string, endTime: string) => {
-    const now = new Date()
-    const start = new Date(startTime)
-    const end = new Date(endTime)
-
-    if (now < start) {
-      return { status: 'upcoming', color: 'bg-blue-100 text-blue-800' }
-    } else if (now >= start && now <= end) {
-      return { status: 'ongoing', color: 'bg-green-100 text-green-800' }
-    } else {
-      return { status: 'ended', color: 'bg-gray-100 text-gray-800' }
-    }
-  }
 
   const getCapacityStatus = (current: number, max: number) => {
     const percentage = (current / max) * 100
@@ -132,9 +103,10 @@ export default function EventsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">All Events</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-2">
             Discover and join amazing events happening around you
           </p>
+          <TimezoneIndicator />
         </div>
         <Link href="/">
           <Button className="mt-4 sm:mt-0">
