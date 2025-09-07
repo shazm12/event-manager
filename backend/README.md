@@ -16,6 +16,12 @@ pip install -r requirements.txt
 
 ### 2. Initialize Database
 
+**Option A: Using SQL Schema (Recommended)**
+```bash
+python setup_database.py setup
+```
+
+**Option B: Direct Database Creation**
 ```bash
 python -m app.database.init_db
 ```
@@ -44,6 +50,23 @@ API available at: `http://localhost:8000`
 ### Attendees
 - `POST /api/events/{id}/register` - Register for event
 
+## Database Setup
+
+This project uses a simple SQL schema file for database setup.
+
+### Database Commands
+
+```bash
+# Setup database with tables and sample data
+python setup_database.py setup
+
+# Reset database (drop and recreate)
+python setup_database.py reset
+
+# Show database information
+python setup_database.py info
+```
+
 ## Project Structure
 
 ```
@@ -54,6 +77,8 @@ backend/
 │   ├── schemas/        # Pydantic schemas
 │   └── database/       # Database config
 ├── main.py            # FastAPI app
+├── setup_database.py  # Database setup script
+├── database_schema.sql # SQL schema file
 └── requirements.txt   # Dependencies
 ```
 
