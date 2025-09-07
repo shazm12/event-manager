@@ -2,6 +2,7 @@ from app.schemas.attendee import AttendeeResponse
 from pydantic import BaseModel, field_validator, model_validator
 from datetime import datetime
 from typing import Optional
+import pytz
 
 class EventBase(BaseModel):
     name: str
@@ -25,6 +26,18 @@ class EventCreate(EventBase):
             raise ValueError('Name and location cannot be empty')
         return v.strip()
     
+    @field_validator('start_time', 'end_time')
+    @classmethod
+    def convert_to_utc(cls, v):
+        """Convert datetime to UTC if it has timezone info, otherwise assume it's already UTC"""
+        if v is None:
+            return v
+ 
+        if v.tzinfo is None:
+            return v.replace(tzinfo=pytz.UTC)
+        
+        return v.astimezone(pytz.UTC)
+    
     @model_validator(mode='after')
     def validate_times(self):
         if self.start_time >= self.end_time:
@@ -37,6 +50,18 @@ class EventUpdate(BaseModel):
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     max_capacity: Optional[int] = None
+    
+    @field_validator('start_time', 'end_time')
+    @classmethod
+    def convert_to_utc(cls, v):
+        """Convert datetime to UTC if it has timezone info, otherwise assume it's already UTC"""
+        if v is None:
+            return v
+        
+        if v.tzinfo is None:
+            return v.replace(tzinfo=pytz.UTC)
+
+        return v.astimezone(pytz.UTC)
 
 class PaginationResponse(BaseModel):
     total: int

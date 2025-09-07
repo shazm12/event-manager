@@ -82,6 +82,13 @@ backend/
 └── requirements.txt   # Dependencies
 ```
 
+## Features
+
+- **Automatic Timezone Conversion**: All datetime fields are automatically converted to UTC
+- **Pagination Support**: Events and attendees support server-side pagination
+- **Data Validation**: Comprehensive validation using Pydantic schemas
+- **RESTful API**: Clean REST endpoints with proper HTTP status codes
+
 ## Environment Variables
 
 Create `.env` file:
