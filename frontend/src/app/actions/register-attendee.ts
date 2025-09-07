@@ -11,7 +11,14 @@ export async function registerAttendee(eventId: string, formData: EventRegistrat
     });
     
     if (!response.ok) {
-      throw new Error('Failed to register attendee');
+      let errorMessage = 'Failed to register attendee';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.detail || errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
     
     return await response.json();

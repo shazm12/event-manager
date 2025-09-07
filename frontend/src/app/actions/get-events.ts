@@ -5,7 +5,14 @@ export async function getEvents(skip: number = 0, limit: number = 100): Promise<
     const response = await fetch(`http://localhost:8000/api/events/?skip=${skip}&limit=${limit}`);
     
     if (!response.ok) {
-        throw new Error('Failed to fetch events');
+      let errorMessage = 'Failed to fetch events';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.detail || errorData.message || errorMessage;
+      } catch {
+        errorMessage = response.statusText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
     
     return await response.json();

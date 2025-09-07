@@ -3,7 +3,14 @@ export async function getEvent(event_id: string) {
         const response = await fetch(`http://localhost:8000/api/events/${event_id}/`);
         
         if (!response.ok) {
-            throw new Error('Event not found');
+            let errorMessage = 'Event not found';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorData.message || errorMessage;
+            } catch {
+                errorMessage = response.statusText || errorMessage;
+            }
+            throw new Error(errorMessage);
         }
         
         return await response.json();
@@ -13,4 +20,4 @@ export async function getEvent(event_id: string) {
         }
         throw new Error('Network error: Unable to fetch event');
     }
-};
+}

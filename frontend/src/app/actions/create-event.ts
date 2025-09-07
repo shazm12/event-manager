@@ -16,12 +16,22 @@ export async function createEvent(formData: EventFormData) {
                 max_capacity: parseInt(formData.maxCapacity),
             }),
         });
-        
         if (!response.ok) {
-            throw new Error('Failed to create event');
+            let errorMessage = 'Failed to create event';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.detail || errorData.message || errorMessage;
+            } catch {
+                errorMessage = response.statusText || errorMessage;
+            }
+            throw new Error(errorMessage);
         }
-        
-        return response.json();
+
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+            return await response.json();
+        }
+        return { success: true, message: 'Event created successfully' };
     } catch (error) {
         if (error instanceof Error) {
             throw error;
