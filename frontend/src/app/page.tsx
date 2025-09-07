@@ -145,7 +145,7 @@ export default function Home() {
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Create, manage, and track your events with ease. From small meetups to large conferences,
-          we've got you covered.
+          we&apos;ve got you covered.
         </p>
       </div>
 

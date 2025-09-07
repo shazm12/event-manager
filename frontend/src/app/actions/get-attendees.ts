@@ -6,6 +6,6 @@ export async function getAttendees(event_id: string, skip: number= 0, limit: num
         }
         return await response.json();
     } catch (error) {
-        throw new Error('Failed to fetch attendees');
+        throw new Error(`Failed to fetch attendees: ${error}`);
     }
 };

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { ArrowLeft, User, Mail, Calendar, MapPin } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
-import { EventRegistrationFormData } from "@/app/types"
+import { Event, EventRegistrationFormData } from "@/app/types"
 import { registerAttendee } from "@/app/actions/register-attendee"
 import { getEvent } from "@/app/actions/get-event"
 
@@ -23,7 +23,7 @@ export default function EventRegisterPage({ params }: { params: Promise<{ event_
     })
 
     const [loading, setLoading] = useState(false)
-    const [event, setEvent] = useState<any>(null)
+    const [event, setEvent] = useState<Event | null>(null);
     const [eventLoading, setEventLoading] = useState(true)
 
     // Fetch event details on component mount
@@ -32,7 +32,7 @@ export default function EventRegisterPage({ params }: { params: Promise<{ event_
             try {
                 const eventData = await getEvent(event_id);
                 setEvent(eventData);
-            } catch (error) {
+            } catch {
                 toast.error('Failed to load event details', {
                     description: 'Please try again later.',
                 })
@@ -136,7 +136,7 @@ export default function EventRegisterPage({ params }: { params: Promise<{ event_
             <div className="container mx-auto px-4 py-8">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-red-600 mb-4">Event Not Found</h1>
-                    <p className="text-muted-foreground mb-4">The event you're looking for doesn't exist.</p>
+                    <p className="text-muted-foreground mb-4">The event you&apos;re looking for doesn&apos;t exist.</p>
                     <Link href="/events">
                         <Button variant="outline">Back to Events</Button>
                     </Link>

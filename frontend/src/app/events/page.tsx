@@ -21,25 +21,25 @@ export default function EventsPage() {
   
 
   useEffect(() => {
-    fetchEvents();
-  }, [currentPage])
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true)
-      const skip = (currentPage - 1) * itemsPerPage;
-      const data = await getEvents(skip, itemsPerPage);
-      setEvents(data.events);
-      setPagination(data.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      toast.error('Failed to load events', {
-        description: 'Please try again later.',
-      })
-    } finally {
-      setLoading(false)
+    const fetchEvents = async () => {
+      try {
+        setLoading(true)
+        const skip = (currentPage - 1) * itemsPerPage;
+        const data = await getEvents(skip, itemsPerPage);
+        setEvents(data.events);
+        setPagination(data.pagination);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        toast.error('Failed to load events', {
+          description: 'Please try again later.',
+        })
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+
+    fetchEvents();
+  }, [currentPage, itemsPerPage])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -118,7 +118,7 @@ export default function EventsPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Events</h1>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={fetchEvents} variant="outline">
+          <Button onClick={() => window.location.reload()} variant="outline">
             Try Again
           </Button>
         </div>

@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 
 export function Topbar() {

@@ -24,35 +24,35 @@ export function AttendeesList({ eventId }: AttendeesListProps) {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchAttendees()
-  }, [eventId, currentPage])
+    const fetchAttendees = async () => {
+      try {
+        setLoading(true);
+        const skip = (currentPage - 1) * itemsPerPage;
+        const data = await getAttendees(eventId, skip, itemsPerPage);
+        
+        if (!data) {
+          throw new Error('Failed to fetch attendees')
+        }      
 
-  const fetchAttendees = async () => {
-    try {
-      setLoading(true);
-      const skip = (currentPage - 1) * itemsPerPage;
-      const data = await getAttendees(eventId, skip, itemsPerPage);
-      
-      if (!data) {
-        throw new Error('Failed to fetch attendees')
-      }      
+        setAttendees(data.attendees)
+        setPagination(data.pagination)
 
-      setAttendees(data.attendees)
-      setPagination(data.pagination)
-
-      const pages = Math.ceil(data.pagination.total / itemsPerPage)
-      setTotalPages(pages);
-      
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
-      setError(errorMessage)
-      toast.error('Failed to load attendees', {
-        description: errorMessage,
-      })
-    } finally {
-      setLoading(false)
+        const pages = Math.ceil(data.pagination.total / itemsPerPage)
+        setTotalPages(pages);
+        
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+        setError(errorMessage)
+        toast.error('Failed to load attendees', {
+          description: errorMessage,
+        })
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+
+    fetchAttendees()
+  }, [eventId, currentPage, itemsPerPage])
 
 
   const handlePreviousPage = () => {
@@ -98,7 +98,7 @@ export function AttendeesList({ eventId }: AttendeesListProps) {
         <CardContent>
           <div className="text-center py-8">
             <p className="text-red-600 mb-4">{error}</p>
-            <Button onClick={fetchAttendees} variant="outline" size="sm">
+            <Button onClick={() => window.location.reload()} variant="outline" size="sm">
               Try Again
             </Button>
           </div>

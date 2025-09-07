@@ -1,37 +1,40 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users, Clock, ArrowLeft, User, Mail } from "lucide-react"
+import { Calendar, MapPin, Clock, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
-import { Event, Attendee } from "../../types"
+import { Event } from "../../types";
+import { getEvent } from "../../actions/get-event";
+import { AttendeesList } from "@/components/attendees-list";
 
 export default function EventDetailsPage({ params }: { params: Promise<{ event_id: string }> }) {
-  const { event_id } = use(params)
-  const [event, setEvent] = useState<Event | null>(null)
-  const [attendees, setAttendees] = useState<Attendee[]>([])
+  const { event_id } = use(params);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const fetchEventDetails = async () => {
+      try {
+        setLoading(true);
+        const event = await getEvent(event_id);
+        setEvent(event);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        toast.error('Failed to load event details', {
+          description: 'Please try again later.',
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchEventDetails()
   }, [event_id])
-
-  const fetchEventDetails = async () => {
-    try {
-      setLoading(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      toast.error('Failed to load event details', {
-        description: 'Please try again later.',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -65,16 +68,6 @@ export default function EventDetailsPage({ params }: { params: Promise<{ event_i
     }
   }
 
-  const getCapacityStatus = (current: number, max: number) => {
-    const percentage = (current / max) * 100
-    if (percentage >= 90) {
-      return { status: 'full', color: 'bg-red-100 text-red-800' }
-    } else if (percentage >= 70) {
-      return { status: 'almost-full', color: 'bg-yellow-100 text-yellow-800' }
-    } else {
-      return { status: 'available', color: 'bg-green-100 text-green-800' }
-    }
-  }
 
   if (loading) {
     return (
@@ -106,8 +99,7 @@ export default function EventDetailsPage({ params }: { params: Promise<{ event_i
     )
   }
 
-  const eventStatus = getEventStatus(event.start_time, event.end_time)
-  const capacityStatus = getCapacityStatus(attendees.length, event.max_capacity)
+  const eventStatus = getEventStatus(event.start_time, event.end_time);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -130,25 +122,8 @@ export default function EventDetailsPage({ params }: { params: Promise<{ event_i
               <Badge className={eventStatus.color}>
                 {eventStatus.status}
               </Badge>
-              <Badge variant="outline" className={capacityStatus.color}>
-                {capacityStatus.status}
-              </Badge>
             </div>
           </div>
-          {eventStatus.status === 'ended' || capacityStatus.status === 'full' ? (
-            <Button 
-              disabled
-              className="mt-4 sm:mt-0"
-            >
-              {eventStatus.status === 'ended' ? 'Event Ended' : 'Event Full'}
-            </Button>
-          ) : (
-            <Link href={`/events/${event_id}/register`}>
-              <Button className="mt-4 sm:mt-0">
-                Register
-              </Button>
-            </Link>
-          )}
         </div>
       </div>
 
@@ -187,83 +162,13 @@ export default function EventDetailsPage({ params }: { params: Promise<{ event_i
                   </p>
                 </div>
               </div>
-
-              {/* Capacity */}
-              <div className="flex items-start gap-3">
-                <Users className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="font-semibold">Capacity</h3>
-                  <p className="text-muted-foreground mb-2">
-                    {attendees.length} / {event.max_capacity} attendees
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${
-                        capacityStatus.status === 'full' ? 'bg-red-500' :
-                        capacityStatus.status === 'almost-full' ? 'bg-yellow-500' : 'bg-green-500'
-                      }`}
-                      style={{
-                        width: `${Math.min((attendees.length / event.max_capacity) * 100, 100)}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Attendees List */}
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Attendees ({attendees.length})
-              </CardTitle>
-              <CardDescription>
-                People registered for this event
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {attendees.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No attendees yet</p>
-                  <p className="text-sm text-muted-foreground">Be the first to register!</p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-3 mb-4">
-                    {attendees.slice(0, 3).map((attendee, index) => (
-                      <div key={attendee.id || index} className="flex items-center gap-3 p-3 rounded-lg border">
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium">{attendee.name}</p>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Mail className="w-3 h-3" />
-                            <span>{attendee.email}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {attendees.length > 3 && (
-                    <div className="text-center pt-4 border-t">
-                      <Link href={`/events/${event_id}/attendees`}>
-                        <Button variant="outline" size="sm">
-                          View All {attendees.length} Attendees
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
+          <AttendeesList eventId={event_id} />
         </div>
       </div>
     </div>

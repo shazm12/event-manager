@@ -1,8 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-export interface DateTimeInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+export type DateTimeInputProps = React.InputHTMLAttributes<HTMLInputElement>
 
 const DateTimeInput = React.forwardRef<HTMLInputElement, DateTimeInputProps>(
   ({ className, type = "datetime-local", ...props }, ref) => {
